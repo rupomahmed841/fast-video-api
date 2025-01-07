@@ -25,7 +25,9 @@ def get_facebook_link(url: str = Query(..., description="Facebook video URL")):
     """ Extracts the direct download link from a Facebook video """
     try:
         for post in get_posts(post_urls=[url], options={"videos": True}):
-            return {"title": post["text"][:50], "direct_url": post["video"]}
+            # Handling the case where "text" may not be available
+            title = post.get("text", "No text available")  # Default if "text" doesn't exist
+            return {"title": title[:50], "direct_url": post["video"]}
     except Exception as e:
         return {"error": str(e)}
 
@@ -34,7 +36,7 @@ def get_instagram_link(url: str = Query(..., description="Instagram video URL"))
     """ Extracts the direct download link from an Instagram video """
     try:
         L = instaloader.Instaloader()
-        shortcode = url.split("/")[-2]
+        shortcode = url.split("/")[-2]  # Extract the shortcode from the URL
         post = instaloader.Post.from_shortcode(L.context, shortcode)
         return {"title": post.caption[:50], "direct_url": post.video_url}
     except Exception as e:
