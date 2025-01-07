@@ -4,3 +4,5 @@ yt-dlp
 facebook-scraper
 instaloader
 lxml[html_clean]
+fake_useragent
+requests
