@@ -1,9 +1,27 @@
+import requests
 from fastapi import FastAPI, Query
 import yt_dlp
+import fake_useragent
 from facebook_scraper import get_posts
 import instaloader
 
 app = FastAPI()
+
+# Function to generate fake cookies by simulating a request to YouTube
+def generate_fake_cookies(url: str):
+    fake_ua = fake_useragent.UserAgent()
+    headers = {
+        "User-Agent": fake_ua.random,
+    }
+    
+    # Simulate a GET request to YouTube
+    response = requests.get(url, headers=headers)
+    
+    # Extract cookies from the response
+    cookies = response.cookies
+    cookie_dict = {cookie.name: cookie.value for cookie in cookies}
+    
+    return cookie_dict
 
 @app.get("/")
 def home():
@@ -13,7 +31,15 @@ def home():
 def get_youtube_link(url: str = Query(..., description="YouTube video URL")):
     """ Extracts the direct download link from a YouTube video """
     try:
-        ydl_opts = {"format": "best"}
+        # Generate fake cookies
+        cookies = generate_fake_cookies(url)
+        
+        # Prepare yt-dlp options with the fake cookies
+        ydl_opts = {
+            "format": "best",
+            "cookies": cookies  # Pass the cookies directly
+        }
+        
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
             return {"title": info["title"], "direct_url": info["url"]}
