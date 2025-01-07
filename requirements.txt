@@ -3,3 +3,4 @@ uvicorn
 yt-dlp
 facebook-scraper
 instaloader
+lxml[html_clean]
